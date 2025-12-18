@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: dynamic-nfs-pvc
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: nfs-client
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: dynamic-test-pod
+spec:
+  containers:
+  - name: test-container
+    image: busybox
+    command: ["/bin/sh"]
+    args: ["-c", "echo 'Dynamic NFS test!' > /data/dynamic-test.txt && cat /data/dynamic-test.txt && sleep 3600"]
+    volumeMounts:
+    - name: dynamic-storage
+      mountPath: /data
+  volumes:
+  - name: dynamic-storage
+    persistentVolumeClaim:
+      claimName: dynamic-nfs-pvc
